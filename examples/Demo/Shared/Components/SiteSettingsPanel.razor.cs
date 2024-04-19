@@ -7,8 +7,8 @@ using Microsoft.FluentUI.AspNetCore.Components.Extensions;
 namespace FluentUI.Demo.Shared.Components;
 
 public partial class SiteSettingsPanel : IAsyncDisposable
-
 {
+    private const string JAVASCRIPT_FILE = "./_content/FluentUI.Demo.Shared/Components/SiteSettingsPanel.razor.js";
     private string? _status;
     private bool _popVisible;
     private bool _ltr = true;
@@ -46,13 +46,12 @@ public partial class SiteSettingsPanel : IAsyncDisposable
         {
             Direction = GlobalState.Dir;
             _ltr = !Direction.HasValue || Direction.Value == LocalizationDirection.LeftToRight;
-            Module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/FluentUI.Demo.Shared/js/CacheStorageAccessor.js");
+            Module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", JAVASCRIPT_FILE);
         }
     }
 
     protected void HandleDirectionChanged(bool isLeftToRight)
     {
-
         _ltr = isLeftToRight;
         Direction = isLeftToRight ? LocalizationDirection.LeftToRight : LocalizationDirection.RightToLeft;
     }
