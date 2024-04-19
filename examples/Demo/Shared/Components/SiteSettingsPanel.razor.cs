@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.JSInterop;
 using Microsoft.FluentUI.AspNetCore.Components.Extensions;
 
 namespace FluentUI.Demo.Shared.Components;
 
-public partial class SiteSettingsPanel
+public partial class SiteSettingsPanel : IAsyncDisposable
+
 {
     private string? _status;
     private bool _popVisible;
@@ -16,7 +18,8 @@ public partial class SiteSettingsPanel
     public required ILogger<SiteSettingsPanel> Logger { get; set; }
 
     [Inject]
-    public required CacheStorageAccessor CacheStorageAccessor { get; set; }
+    private IJSRuntime JSRuntime { get; set; } = default!;
+    private IJSObjectReference? Module { get; set; }
 
     [Inject]
     public required GlobalState GlobalState { get; set; }
@@ -37,12 +40,13 @@ public partial class SiteSettingsPanel
         }
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             Direction = GlobalState.Dir;
             _ltr = !Direction.HasValue || Direction.Value == LocalizationDirection.LeftToRight;
+            Module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/FluentUI.Demo.Shared/js/CacheStorageAccessor.js");
         }
     }
 
@@ -57,7 +61,7 @@ public partial class SiteSettingsPanel
     {
         var msg = "Site settings reset and cache cleared!";
 
-        await CacheStorageAccessor.RemoveAllAsync();
+        await Module!.InvokeVoidAsync("removeAll");
         _theme?.ClearLocalStorageAsync();
 
         Logger.LogInformation(msg);
@@ -76,5 +80,14 @@ public partial class SiteSettingsPanel
             _ => color.ToAttributeValue(),
         };
 
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (Module is not null)
+        {
+            return Module.DisposeAsync();
+        }
+        return ValueTask.CompletedTask;
     }
 }
