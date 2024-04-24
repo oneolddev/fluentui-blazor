@@ -1,19 +1,17 @@
-async function openCacheStorage() {
-    try {
-        return await window.caches.open("FluentUI.Demo")
-    }
-    catch (err) {
-        return undefined;
-    }
-}
-
 export async function removeAll() {
-    let cache = await openCacheStorage();
-
-    if (cache != null) {
-        cache.keys().then(function (names) {
-            for (let name of names)
-                cache.delete(name);
-        });
-    }
+    // get list of all cache instances
+    window.caches.keys().then((cacheKeys) => {
+        for (const cacheName of cacheKeys) {
+            // open each cache and delete all items within it
+            window.caches.open(cacheName).then((cache) => {
+                cache.keys().then((itemNames) => {
+                    for (let name of itemNames) {
+                        cache.delete(name);
+                    };
+                });
+            });
+        };
+    }).catch((error) => {
+        console.error('Error fetching cache keys:', error);
+    });
 }
