@@ -12,10 +12,15 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" />
-    <PackageReference Include="coverlet.collector"  />
-    <PackageReference Include="Microsoft.NET.Test.Sdk"  />
-    <PackageReference Include="xunit"  />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.CodeAnalysis" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\examples\Demo\DocGenerator\FluentUI.Demo.Generators.csproj" />
   </ItemGroup>
 
   <ItemGroup>

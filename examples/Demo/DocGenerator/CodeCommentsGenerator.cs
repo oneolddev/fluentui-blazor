@@ -71,7 +71,7 @@ public class CodeCommentsGenerator : IIncrementalGenerator
         context.AddSource($"CodeComments.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
     }
 
-    private static string CleanupParamName(string value)
+    internal static string CleanupParamName(string value)
     {
         Regex regex = new("[P,T,M,F]:Microsoft\\.FluentUI\\.AspNetCore\\.Components\\.");
         value = regex.Replace(value, "");
@@ -86,7 +86,7 @@ public class CodeCommentsGenerator : IIncrementalGenerator
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "Need to use Envrionment to ensure the right newline is generated for platform it is being builtand run on")]
-    private static string CleanupSummary(string value)
+    internal static string CleanupSummary(string value)
     {
         Regex regex = new(@"[ ]{2,}");
         value = regex.Replace(value, "");
