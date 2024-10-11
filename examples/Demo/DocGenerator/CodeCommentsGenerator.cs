@@ -127,4 +127,100 @@ public class CodeCommentsGenerator : IIncrementalGenerator
 
     }
 
+    #region Additional methods for parsing ParamName
+    internal static string ReduceArgument(string input)
+    {
+        var l = ParseString(input);
+        if (l.Count > 1)
+        {
+            List<string> nl = new();
+            foreach (var i in l)
+            {
+                nl.Add(ReduceArgument(i));
+            }
+            input = string.Join(",", nl);
+        }
+        else
+        {
+            // text enclosed by outermost curly braces
+            Match match = Regex.Match(input, @"{(.*)}");
+            if (match.Success)
+            {
+                var a = match.Groups[1].Value;
+                var b = ReduceArgument(a);
+                input = input.Replace(a, b);
+            }
+        }
+
+        // removes all text before last period including period
+        return Regex.Replace(input, @".*\.", ""); ;
+    }
+    internal static string Transform(string input)
+    {
+        // text enclosed by outermost curly braces
+        Match match = Regex.Match(input, @"{(.*)}");
+        if (match.Success)
+        {
+            var a = match.Groups[1].Value;
+            var b = Transform(a);
+            input = input.Replace(a, b);
+            // replace {} with <>
+            input = Regex.Replace(input, @"\{([^}]*)\}", "<$1>");
+            // transform ValueTuple
+            input = Regex.Replace(input, @"ValueTuple<(.+)>", "($1)");
+            // transform Nullable
+            input = Regex.Replace(input, @"Nullable<(.+)>", "$1?");
+        }
+        if (input.Equals("String"))
+        {
+            input = "string";
+        }
+        else if (input.Equals("Int32"))
+        {
+            input = "int";
+        }
+        else if (input.Equals("Boolean"))
+        {
+            input = "bool";
+        }
+        return input;
+    }
+    internal static List<string> ParseString(string input)
+    {
+        var result = new List<string>();
+        var pattern = @"(?>[^,{]+|\{(?:[^{}]+|(?<open>\{)|(?<-open>\}))*\}(?(open)(?!)))+";
+        var matches = Regex.Matches(input, pattern);
+
+        foreach (Match match in matches)
+        {
+            result.Add(match.Value);
+        }
+
+        return result;
+    }
+    internal static string ProcessParamName(string input)
+    {
+        string pattern = @"\((.*)\)$";
+        Match match = Regex.Match(input, pattern);
+        if (match.Success)
+        {
+            string arguments = match.Groups[1].Value;
+            var listArguments = ParseString(arguments);
+            List<string> reducedArguments = new();
+            foreach (var arg in listArguments)
+            {
+                //        Console.WriteLine(arg);
+                var ra = ReduceArgument(arg);
+                //        Console.WriteLine(ra);
+                var ta = Transform(ra);
+                //        Console.WriteLine(ta);
+                reducedArguments.Add(ta);
+            }
+            var newArguments = string.Join(",", reducedArguments);
+            input = input.Replace(arguments, newArguments);
+        }
+
+        return input;
+    }
+    #endregion
 }
