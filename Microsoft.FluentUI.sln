@@ -45,6 +45,8 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Microsoft.FluentUI.AspNetCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.FluentUI.AspNetCore.Components.DataGrid.ODataAdapter", "src\Extensions\DataGrid.ODataAdapter\Microsoft.FluentUI.AspNetCore.Components.DataGrid.ODataAdapter.csproj", "{AFFDA282-83AB-44FA-B400-C935BBFE3308}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentUI.Demo.Shared.Tests", "tests\FluentUI.Demo.Shared\FluentUI.Demo.Shared.Tests.csproj", "{EC7C2522-3B89-43B2-8CAD-78AA050530C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,10 @@ Global
 		{AFFDA282-83AB-44FA-B400-C935BBFE3308}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFFDA282-83AB-44FA-B400-C935BBFE3308}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFFDA282-83AB-44FA-B400-C935BBFE3308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC7C2522-3B89-43B2-8CAD-78AA050530C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC7C2522-3B89-43B2-8CAD-78AA050530C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC7C2522-3B89-43B2-8CAD-78AA050530C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC7C2522-3B89-43B2-8CAD-78AA050530C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +130,7 @@ Global
 		{E4E62EAA-38FC-48FE-B63E-EB4ABAD660D2} = {17F26C55-E329-4117-B64D-0393E912FFFE}
 		{292081C2-5076-467C-AEFF-12DC0617531A} = {DF88C07D-46D7-4DEC-ACE4-409217634E57}
 		{AFFDA282-83AB-44FA-B400-C935BBFE3308} = {1199ECBA-EE19-44CD-A471-85AB2F44489C}
+		{EC7C2522-3B89-43B2-8CAD-78AA050530C9} = {EBE3ACB2-9B23-4F91-9953-7153E3D2B0DA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {420693A7-C2FD-498C-8E78-4B65CC25389A}
