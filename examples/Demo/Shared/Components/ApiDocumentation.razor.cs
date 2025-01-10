@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -216,14 +217,67 @@ public partial class ApiDocumentation
     /// see the following about name mangling when dealing with generics
     /// https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/#id-strings
     /// </remarks>
-    private static string GetDescription(Type component, MethodInfo methodInfo)
+    internal static string GetDescription(Type component, MethodInfo methodInfo)
     {
-        var genericArgumentCount = methodInfo.GetGenericArguments().Length;
-        var mangledName = methodInfo.Name + (genericArgumentCount == 0 ? "" : $"``{genericArgumentCount}");
+        var genericArgument = methodInfo.GetGenericArguments();
+        var mangledName = methodInfo.Name
+            + (genericArgument.Length == 0 ? "" : $"``{genericArgument.Length}");
 
+        string arguments = string.Empty;
+        var parameters = methodInfo.GetParameters();
+        if (parameters.Length > 0)
+        {
+            string a = string.Join(",", parameters.Select(i => i.ParameterType.FullName).ToArray());
+            arguments = $"({a})";
+        }
+
+        //var description = DescriptionFromCodeComments(component, mangledName + arguments);
         var description = DescriptionFromCodeComments(component, mangledName);
 
+        Console.WriteLine($"[ApiDocumentation] GetDescription: {component.FullName}");
+        Console.WriteLine($" -> {methodInfo.Name}");
+        Console.WriteLine($" -> {mangledName}");
+        Console.WriteLine($" -> {string.Join(",", methodInfo.GetGenericArguments().Select(t => t.ToString()))}");
+        Console.WriteLine($" -> {string.Join(",", GetMethodParameters(methodInfo))}");
+
         return description;
+    }
+
+    private static IEnumerable<string> GetMethodParameters(MethodInfo methodInfo)
+    {
+        List<string> results = new List<string>();
+
+        foreach (var p in methodInfo.GetParameters())
+        {
+            var typeName = p.ToTypeNameString();
+            results.Add(SimplifyIfValueTupleTypeName(typeName));
+            //results.Add( static (int i) => { return i.ToString(); });
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Processes a string representing a tuple type and replaces the content of the tuple
+    /// with only the first words of each item.
+    /// </summary>
+    /// <param name="typeName">The string representing the tuple type.</param>
+    /// <returns>The processed string with only the first words of each item in the tuple.</returns>
+    private static string SimplifyIfValueTupleTypeName(string typeName)
+    {
+        var valueTuplePattern = @"^\(\w+\s\w+(,\s\w+\s\w+)*\)\??$";
+        var match = Regex.Match(typeName, valueTuplePattern);
+
+        if (match.Success)
+        {
+            var content = match.Groups[1].Value;
+            var items = content.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+            var firstWords = items.Select(item => item.Split(' ')[0]);
+            var replacedContent = string.Join(", ", firstWords);
+            return typeName.Replace(content, replacedContent);
+        }
+
+        return typeName;
     }
 
     /// <summary>
@@ -262,5 +316,24 @@ public partial class ApiDocumentation
         }
 
         return [];
+    }
+
+    private const string typePattern = @"\[[a-zA-Z0-9.,= ]+\]";
+    private const string tuplePattern = $"^{typePattern}(,{typePattern})+$";
+
+    internal static bool IsTuple(string input)
+    {
+        var match = Regex.Match(input, tuplePattern);
+
+        return match.Success;
+    }
+
+    internal static List<string> TupleParameterTypeList(string input)
+    {
+        var matches = Regex.Matches(input, typePattern);
+
+        List<string> list = matches.Cast<Match>().Select(m => m.Value).ToList();
+
+        return list;
     }
 }

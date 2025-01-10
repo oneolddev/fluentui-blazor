@@ -1956,6 +1956,7 @@
         <member name="P:Microsoft.FluentUI.AspNetCore.Components.FluentDataGrid`1.OnRowFocus">
             <summary>
             Gets or sets a callback when a row is focused.
+            As of 4.11 a row is a tr element with a 'display: contents'. Browsers can not focus such elements currently, but work is underway to fix that.
             </summary>
         </member>
         <member name="P:Microsoft.FluentUI.AspNetCore.Components.FluentDataGrid`1.OnCellFocus">
