@@ -1,3 +1,7 @@
+// ------------------------------------------------------------------------
+// MIT License - Copyright (c) Microsoft Corporation. All rights reserved.
+// ------------------------------------------------------------------------
+
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -96,7 +100,8 @@ public partial class ApiDocumentation
                 }
 
                 return obj?.GetType().GetProperty(propertyName)?.GetValue(obj);
-            };
+            }
+            ;
 
             var allProperties = Component.GetProperties().Select(i => (MemberInfo)i);
             var allMethods = Component.GetMethods().Where(i => !i.IsSpecialName).Select(i => (MemberInfo)i);
@@ -238,7 +243,12 @@ public partial class ApiDocumentation
         Console.WriteLine($" -> {methodInfo.Name}");
         Console.WriteLine($" -> {mangledName}");
         Console.WriteLine($" -> {string.Join(",", methodInfo.GetGenericArguments().Select(t => t.ToString()))}");
+        //Console.WriteLine($" -> {string.Join(",", GetMethodParameters(methodInfo))}");
         Console.WriteLine($" -> {string.Join(",", GetMethodParameters(methodInfo))}");
+        foreach (var p in GetMethodParameters(methodInfo))
+        {
+            Console.WriteLine(p);
+        }
 
         return description;
     }
@@ -249,8 +259,11 @@ public partial class ApiDocumentation
 
         foreach (var p in methodInfo.GetParameters())
         {
-            var typeName = p.ToTypeNameString();
-            results.Add(SimplifyIfValueTupleTypeName(typeName));
+            //var typeName = p.ToTypeNameString();
+            //results.Add(SimplifyIfValueTupleTypeName(typeName));
+            //var typeName = p.ToTypeNameString(null,true);
+            //results.Add(typeName);
+            results.Add(p.ParameterType.FullName);
             //results.Add( static (int i) => { return i.ToString(); });
         }
 

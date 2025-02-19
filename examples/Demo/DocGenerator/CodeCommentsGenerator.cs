@@ -79,6 +79,7 @@ public class CodeCommentsGenerator : IIncrementalGenerator
         value = regex.Replace(value, "");
         regex = new("[P,T,M,F]:FluentUI\\.Demo\\.Shared\\.");
         value = regex.Replace(value, "");
+
         //regex = new("\\(.*\\)$");
         //value = regex.Replace(value, "");
 

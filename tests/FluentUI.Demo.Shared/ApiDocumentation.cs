@@ -2,6 +2,7 @@
 // MIT License - Copyright (c) Microsoft Corporation. All rights reserved.
 // ------------------------------------------------------------------------
 
+using System.ComponentModel.Design;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -389,6 +390,72 @@ public class ApiDocumentation
         while (Regex.IsMatch(input, nullablePattern))
         {
             input = Regex.Replace(input, nullablePattern, "$1?");
+        }
+
+        return input;
+    }
+
+    [Theory]
+    [InlineData("System.String",
+        "System.String")]
+    [InlineData("System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "System.Nullable{System.Int32}")]
+    [InlineData("System.Nullable`1[[Microsoft.AspNetCore.Components.EventCallback`1[[Microsoft.FluentUI.AspNetCore.Components.ToastResult, Microsoft.FluentUI.AspNetCore.Components, Version=4.11.1.0, Culture=neutral, PublicKeyToken=null]], Microsoft.AspNetCore.Components, Version=9.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]\r\n",
+        "System.Nullable{Microsoft.AspNetCore.Components.EventCallback{Microsoft.FluentUI.AspNetCore.Components.ToastResult}}")]
+    [InlineData("System.Nullable`1[[System.ValueTuple`2[[Microsoft.FluentUI.AspNetCore.Components.Icon, Microsoft.FluentUI.AspNetCore.Components, Version=4.11.1.0, Culture=neutral, PublicKeyToken=null],[Microsoft.FluentUI.AspNetCore.Components.Color, Microsoft.FluentUI.AspNetCore.Components, Version=4.11.1.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]\r\n",
+        "System.Nullable{System.ValueTuple{Microsoft.FluentUI.AspNetCore.Components.Icon,Microsoft.FluentUI.AspNetCore.Components.Color}}")]
+    public void NormalizeParameterTest(string input, string expected)
+    {
+        var actual = NormalizeParameter(input);
+
+        Assert.Equal(expected, actual);
+    }
+
+    private static string NormalizeParameter(string input)
+    {
+        if (Components.ApiDocumentation.IsTuple(input))
+        {
+            var typesInTuple = Components.ApiDocumentation.TupleParameterTypeList(input);
+            foreach (var type in typesInTuple)
+            {
+                var match = Regex.Match(type, input);
+                var b = NormalizeParameter(match.Value);
+                input = input.Replace(match.Value, b);
+            }
+        }
+        else
+        {
+            string pattern = @"\[([^][]*)\]";
+            var match = Regex.Match(input, pattern);
+            if (match.Success)
+            {
+                var b = NormalizeParameter(match.Groups[1].Value);
+                input = input.Replace(match.Groups[0].Value, b);
+            }
+            input = StripAssemblyInformation(input);
+        }
+
+        /*
+        var matches = Regex.Matches(input, pattern);
+
+        foreach (Match match in matches)
+        {
+            var b = NormalizeParameter(match.Groups[1].Value);
+            input = input.Replace(match.Groups[0].Value, b);
+        }
+        */
+
+
+        return input;
+    }
+
+    private static string StripAssemblyInformation(string input)
+    {
+        var pattern = @"([^,]+)";
+        var match = Regex.Match(input, pattern);
+        if (match.Success)
+        {
+            return match.Groups[1].Value;
         }
 
         return input;
